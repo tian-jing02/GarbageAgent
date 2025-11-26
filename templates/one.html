@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		   <link rel="stylesheet" href="{{ url_for('static', filename='css/one.css') }}">
+		   <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/box2-rubbish.css') }}" />
+		   <script src="{{ url_for('static', filename='js/box2-rubbish.js') }}"></script>
+		   <title>自然</title>
+	</head>
+	<body>
+		<div class="main">
+		<!-- 导航栏 -->
+			<header>
+				<!-- <div class="logo">
+					<img src="../image/Logo.png" alt="Logo"/>
+				</div> -->
+				<img src="../static/image/Logo4.svg" alt="Logo" style="width: 600px; height: 500px;"/>
+				<nav>
+					<ul>
+						<li><a href="#">HOME</a></li> <!-- 家 -->
+						<li><a href="#">ABOUT</a></li> <!-- 关于 -->
+						<li><a href="#">SERVICE</a></li> <!-- 服务 -->
+						<li><a href="#">PROJECTS</a></li> <!-- 项目 -->
+						<li><a href="#">STORIES</a></li> <!-- 故事 -->
+						<li><a href="#">KNOWLEDGE</a></li> <!-- 知识 -->
+						<li><a href="#">CONTACT</a></li> <!-- 联系 -->
+					</ul>
+				</nav>
+			</header>
+		<!-- 导航栏 -->
+		<!-- 中间部分 -->
+			<div class="hero">
+				<div class="box">
+					<h3>Discover The Colorful World</h3> <!-- 探索多彩的世界 -->
+					<h1>New Adventure</h1> <!-- 新冒险 -->
+					<p>Introduce the content of garbage sorting</p> <!-- 介绍垃圾分类的内容 -->
+					<button>Discover Now</button> <!-- 立即发现 -->
+				</div>
+			</div>
+		<!-- 中间部分 -->
+		</div>
+		
+		<!-- 下文一 -->
+		<section class="box1">
+			<div class="box1-container">
+				<div class="box1-content">
+					<div class="box1-text">
+						<hgroup class="">
+						    <h2 class="">ABOUT</h2>
+						</hgroup>
+						<p class="box1-text-1">ウミとヒトを、ポジティブにつなぎ直す</p>
+						<p class="box1-text-2">UMITO Partnersは、海と人を持続可能な関係へとつなぎ直し、<br class="box1-text-2-1">海をネイチャーポジティブへとシフトする<br class="box1-text-2-2">海洋サステナビリティ・コンサルティング会社です。</p>
+						<div class="box1-text-3">
+							<a href="#" class="box1-text-3-1"><p class="">MORE</p></a>
+						</div>
+					</div>
+				</div>
+				<div class="box1-img"><img src="../static/image/8.jpg"/></div>
+			</div>
+		</section>
+		<!-- 下文一 -->
+		
+		<!-- 下文三-->
+		<div class="box3-under">
+                <div class="ai-interaction-box">
+                    <div id="chat-box" class="chat-display">
+                        <div class="ai-message">
+                            你好！我是你的垃圾分类助手。请问需要分类什么物品？
+                        </div>
+                    </div>
+
+                    <div class="input-area">
+                        <input type="file" id="file-input" accept="image/*" style="display: none;">
+                        <label for="file-input" class="upload-button">
+                            📸 上传图片
+                        </label>
+
+                        <input type="text" id="user-input" placeholder="输入物品名称和城市（例如：上海的废旧手机壳怎么扔？）">
+
+                        <button id="send-btn" onclick="sendMessage()">发送</button>
+                    </div>
+                </div>
+             </div>
+		<!-- 下文三-->
+		
+		<!-- 下文二 -->
+		<div class="box2">
+			<div class="box2-container">
+				<div class="box2-on">
+					<div class="box2-on-title">
+						<h1>垃圾分类的类型</h1>
+					</div>
+				</div>
+				<div class="box2-under">
+					<div class="box2-Recyclable">
+						<div class="box2-rubbish">
+							<figure class="snip1477">
+							  <img src="../static/image/10.jpg" alt="sample38" />
+							  <div class="title">
+							    <div>
+							      <h2>rubbish</h2>
+							      <h4>Recyclable</h4>
+							    </div>
+							  </div>
+							  <figcaption>
+							    <p>正确分类可回收物，共创绿色家园。</p>
+							  </figcaption>
+							  <a href="#"></a>
+							</figure>
+						</div>
+					</div>
+					<div class="box2-Non-recylable">
+						<div class="box2-rubbish">
+							<figure class="snip1477">
+							  <img src="../static/image/11.jpg" alt="sample38" />
+							  <div class="title">
+							    <div>
+							      <h2>rubbish</h2>
+							      <h4>Non recylable</h4>
+							    </div>
+							  </div>
+							  <figcaption>
+							    <p>污染环境，需专门处理，隔绝危害。</p>
+							  </figcaption>
+							  <a href="#"></a>
+							</figure>
+						</div>
+					</div>
+					<div class="box2-Kitchen">
+						<div class="box2-rubbish">
+							<figure class="snip1477">
+							  <img src="../static/image/12.jpg" alt="sample38" />
+							  <div class="title">
+							    <div>
+							      <h2>rubbish</h2>
+							      <h4>Kitchen</h4>
+							    </div>
+							  </div>
+							  <figcaption>
+							    <p>厨余垃圾分开投，循环利用益千秋。</p>
+							  </figcaption>
+							  <a href="#"></a>
+							</figure>
+						</div>
+					</div>
+					<div class="box2-Hazardous">
+						<div class="box2-rubbish">
+							<figure class="snip1477">
+							  <img src="../static/image/13.jpg" alt="sample38" />
+							  <div class="title">
+							    <div>
+							      <h2>rubbish</h2>
+							      <h4>Hazardous</h4>
+							    </div>
+							  </div>
+							  <figcaption>
+							    <p>内含毒素，妥善处理，避免贻害。</p>
+							  </figcaption>
+							  <a href="#"></a>
+							</figure>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- 下文二 -->
+
+          </div>
+       </div>
+	</body>
+	<script>
+        // 定义 sendMessage 函数，在点击发送按钮时触发
+        async function sendMessage() {
+            // 1. 获取 ID 对应的元素
+            const inputField = document.getElementById("user-input");
+            const fileInput = document.getElementById("file-input");
+            const chatBox = document.getElementById("chat-box");
+
+            const text = inputField.value;
+            const file = fileInput.files[0];
+
+            if (!text && !file) return;
+
+            // 2. 在聊天窗口显示用户消息
+            const userMsgHtml = `<div class="user-message">👤 你: ${text}</div>`;
+            chatBox.innerHTML += userMsgHtml;
+            chatBox.scrollTop = chatBox.scrollHeight; // 滚动到底部
+
+            // 3. 显示 AI 正在处理的提示
+            const loadingMsgHtml = `<div class="ai-message" id="loading-msg">🤖 正在调用 Agent 思考并查询规则...</div>`;
+            chatBox.innerHTML += loadingMsgHtml;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // 4. 准备发送给 Python 的数据
+            const formData = new FormData();
+            formData.append("message", text);
+            if (file) {
+                formData.append("image", file);
+            }
+
+            // 清空输入框和文件选择
+            inputField.value = '';
+            fileInput.value = '';
+
+            try {
+                // 5. 发送请求给 Flask 后端 /chat 接口
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                // 6. 移除加载提示，显示 AI 的回复
+                const loadingElement = document.getElementById("loading-msg");
+                if (loadingElement) {
+                    loadingElement.remove();
+                }
+
+                if (data.status === "success") {
+                    const aiReplyHtml = `<div class="ai-message">💡 AI 助手: ${data.reply}</div>`;
+                    chatBox.innerHTML += aiReplyHtml;
+                } else {
+                    const errorMsgHtml = `<div class="ai-message error">❌ 抱歉，处理时出错了: ${data.reply}</div>`;
+                    chatBox.innerHTML += errorMsgHtml;
+                }
+
+                chatBox.scrollTop = chatBox.scrollHeight; // 滚动到底部
+
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                const loadingElement = document.getElementById("loading-msg");
+                if (loadingElement) {
+                    loadingElement.remove();
+                }
+                chatBox.innerHTML += `<div class="ai-message error">❌ 网络或服务器连接失败。</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+
+        // 绑定事件到发送按钮
+        document.getElementById("send-btn").addEventListener("click", sendMessage);
+
+        // 也可以绑定回车事件
+        document.getElementById("user-input").addEventListener("keypress", function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+                e.preventDefault(); // 阻止默认的换行行为
+            }
+        });
+
+    </script>
+</html>

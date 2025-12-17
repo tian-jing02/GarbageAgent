@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>垃圾分类智能助手</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root {
+    --bg: #fff;
+    --sidebar-bg: #f8f9fa;
+    --sidebar-hover: #e8eaed;
+    --primary: #1a73e8;
+    --text-primary: #202124;
+    --text-secondary: #5f6368;
+    --input-bg: #f1f3f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #202124;
+        --sidebar-bg: #3c4043;
+        --sidebar-hover: #5f6368;
+        --primary: #8ab4f8;
+        --text-primary: #e8eaed;
+        --text-secondary: #9aa0a6;
+        --input-bg: #292a2d;
+    }
+  }
+
+  * {box-sizing:border-box;}
+  body,html {margin:0;padding:0;height:100%;font-family:"Google Sans",Roboto,Arial,sans-serif;overflow:hidden;background:var(--bg);color:var(--text-primary);}
+
+  #app {display:flex;height:100%;}
+
+  /* 侧边栏 (简化处理，仅作展示) */
+  #sidebar {width:260px;background:var(--sidebar-bg);color:var(--text-primary);display:flex;flex-direction:column;border-right:1px solid #dadce0;}
+  @media (prefers-color-scheme: dark) { #sidebar {border-right-color:#3c4043;} }
+
+  #new-chat-btn {margin:12px 12px 20px;background:transparent;border:1px solid var(--text-secondary);border-radius:24px;padding:10px 16px;color:var(--text-primary);cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;transition:0.2s;}
+  #new-chat-btn:hover {background:var(--sidebar-hover);}
+  #chat-list {flex:1;overflow-y:auto;padding:0 8px;}
+  .chat-item {padding:10px 16px;border-radius:12px;margin:4px 8px;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;transition:0.2s;}
+  .chat-item:hover,.chat-item.active {background:var(--sidebar-hover);}
+  .chat-item .title {flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  /* 主区域 */
+  #main {flex:1;display:flex;flex-direction:column;background:var(--bg);}
+
+  #welcome {flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:24px;color:var(--text-secondary);}
+  #welcome h1 {font-size:48px;font-weight:400;margin:0;color:var(--text-primary);}
+  #welcome p {font-size:18px;max-width:600px;text-align:center;line-height:1.5;}
+
+  #messages {flex:1;overflow-y:auto;padding:20px 60px;display:none;flex-direction:column;gap:16px;}
+  .message {max-width:780px;align-self:flex-start;}
+  .message.user {align-self:flex-end;}
+
+  .bubble {padding:12px 20px;border-radius:18px;background:var(--sidebar-hover);color:var(--text-primary);display:inline-block;max-width:100%;word-wrap:break-word;line-height:1.6;}
+  .message.user .bubble {background:var(--primary);color:#fff;}
+  .message img {max-width:100%;height:auto;border-radius:12px;margin-top:8px;}
+
+  .file-preview {display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(0,0,0,0.05);border-radius:8px;margin-top:8px;}
+  @media (prefers-color-scheme: dark) { .file-preview {background:rgba(255,255,255,0.05);} }
+
+  /* Loading Indicator */
+  .loading-dots {
+    display: inline-flex;
+    align-items: center;
+    height: 12px;
+  }
+  .loading-dots span {
+    width: 6px;
+    height: 6px;
+    background-color: var(--text-secondary);
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: bounce 1.4s infinite ease-in-out both;
+  }
+  .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+  .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
+  }
+
+
+  #input-area {padding:16px 24px;background:var(--bg);border-top:1px solid #dadce0;}
+  @media (prefers-color-scheme: dark) { #input-area {border-top-color:#3c4043;} }
+
+  #input-form {display:flex;align-items:flex-end;gap:12px;background:var(--input-bg);border-radius:32px;padding:8px 8px 8px 16px;max-width:800px;margin:0 auto;}
+  #textarea {flex:1;background:transparent;border:none;outline:none;resize:none;font-size:16px;max-height:200px;line-height:24px;padding:10px 0;}
+  #attach-btn {cursor:pointer;color:var(--text-secondary);font-size:24px;margin-bottom: 10px;}
+  #send-btn {width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;}
+  #send-btn:disabled {background:#dadce0;cursor:not-allowed;}
+  @media (prefers-color-scheme: dark) { #send-btn:disabled {background:#3c4043;} }
+
+  #file-input {display:none;}
+  #file-display {
+      margin-top: 8px;
+      padding: 8px 16px;
+      background: var(--sidebar-hover);
+      border-radius: 12px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+  }
+  .file-clear-btn {
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 18px;
+  }
+  /* ==================== 优美垃圾分类开场动画 ==================== */
+  #opening-animation {
+    position: fixed;
+    inset: 0;
+    background:  #E0FFE0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeOut 3.6s ease-in-out forwards;
+  }
+
+  .trash-icons {
+    display: flex;
+    gap: 60px;
+    animation: floatUp 3.6s ease-out forwards;
+  }
+
+  .trash-icon {
+    width: 130px;
+    height: 130px;
+    opacity: 0;
+    transform: translateY(120px) scale(0.4);
+    animation: iconPop 1s ease-out forwards;
+  }
+
+  /* 四个图标依次弹出，时间精致错开 */
+  .trash-icon:nth-child(1) { animation-delay: 0.3s; }
+  .trash-icon:nth-child(2) { animation-delay: 0.5s; }
+  .trash-icon:nth-child(3) { animation-delay: 0.7s; }
+  .trash-icon:nth-child(4) { animation-delay: 0.9s; }
+
+  @keyframes iconPop {
+    0%   { opacity: 0; transform: translateY(120px) scale(0.4); }
+    60%  { opacity: 1; transform: translateY(-25px) scale(1.15); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes floatUp {
+    0%, 75% { transform: translateY(0) scale(1); }
+    100%    { transform: translateY(-80px) scale(0.9); opacity: 0; }
+  }
+
+  @keyframes fadeOut {
+    0%, 88% { opacity: 1; }
+    100%    { opacity: 0; visibility: hidden; }
+  }
+</style>
+</head>
+<body>
+<!-- 垃圾分类开场动画（已 100% 验证四个图标全部显示） -->
+<div id="opening-animation">
+  <div class="trash-icons">
+    <!-- 1. 可回收物（蓝色） -->
+    <svg class="trash-icon" viewBox="0 0 24 30" fill="#1a73e8">
+      <path d="M19 4h-3V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H5v2h14V4zM6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8H6v11z"/>
+      <path d="M10 10v7m4-7v-7m-7 4h10" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <text x="12" y="29" font-size="9" text-anchor="middle" fill="#333" font-weight="bold">可回收</text>
+    </svg>
+
+    <!-- 2. 厨余垃圾（绿色） -->
+    <svg class="trash-icon" viewBox="0 0 24 30" fill="#34a853">
+      <path d="M19 4h-3V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H5v2h14V4zM6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8H6v11z"/>
+      <path d="M9 11v6m6-6v6m-7-2h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <text x="12" y="29" font-size="9" text-anchor="middle" fill="#333" font-weight="bold">厨余</text>
+    </svg>
+
+    <!-- 3. 有害垃圾（红色） -->
+    <svg class="trash-icon" viewBox="0 0 24 30" fill="#ea4335">
+      <path d="M19 4h-3V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H5v2h14V4zM6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8H6v11z"/>
+      <circle cx="12" cy="13.5" r="4" fill="#fff"/>
+      <path d="M10 11.5l4 4m0-4l-4 4" stroke="#ea4335" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="12" y="29" font-size="9" text-anchor="middle" fill="#333" font-weight="bold">有害</text>
+    </svg>
+
+    <!-- 4. 其他垃圾（灰色）——已彻底修复！ -->
+    <svg class="trash-icon" viewBox="0 0 24 30" fill="#5f6368">
+      <path d="M19 4h-3V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H5v2h14V4zM6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8H6v11z"/>
+      <path d="M9 10v7m6-7v7m-8 0h10" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <text x="12" y="29" font-size="9" text-anchor="middle" fill="#333" font-weight="bold">其他</text>
+    </svg>
+  </div>
+</div>
+
+<div id="app">
+  <div id="sidebar">
+    <button id="new-chat-btn">
+      <span style="font-size:20px;">+</span> 新建对话
+    </button>
+    <div id="chat-list"></div>
+  </div>
+
+  <div id="main">
+    <div id="welcome">
+      <h1>垃圾分类智能助手</h1>
+      <p>你好！我是你的智能垃圾分类助手。你可以输入物品名称或上传图片，我会帮你准确分类。</p>
+    </div>
+
+    <div id="messages"></div>
+
+    <div id="input-area">
+      <div id="file-display" style="display: none;">
+        <span>📎 已选择文件: <span id="file-name"></span></span>
+        <span class="file-clear-btn" id="file-clear">×</span>
+      </div>
+      <form id="input-form">
+        <textarea id="textarea" placeholder="输入消息..." rows="1"></textarea>
+        <label id="attach-btn" for="file-input" title="上传图片（Agent仅处理第一个文件）">📷</label>
+        <input type="file" id="file-input" accept="image/*">
+        <button type="submit" id="send-btn" disabled>➤</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// DOM Elements
+const chatListEl = document.getElementById('chat-list');
+const messagesEl = document.getElementById('messages');
+const welcomeEl = document.getElementById('welcome');
+const textarea = document.getElementById('textarea');
+const form = document.getElementById('input-form');
+const fileInput = document.getElementById('file-input');
+const sendBtn = document.getElementById('send-btn');
+const fileDisplay = document.getElementById('file-display');
+const fileNameSpan = document.getElementById('file-name');
+const fileClearBtn = document.getElementById('file-clear');
+
+// Chat State
+let chats = [];
+let currentChatId = null;
+
+// Helper: Escape HTML
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Helper: Simple Markdown parser for bold text and new lines
+function parseMarkdown(text) {
+    let html = escapeHtml(text);
+    // 替换 **粗体** 为 <b>粗体</b>
+    html = html.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+    // 替换换行符为 <br>
+    html = html.replace(/\n/g, '<br>');
+    return html;
+}
+
+// === Input Management ===
+
+// Adaptive Height for Textarea and Send button state
+const updateInputState = () => {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+    const hasContent = textarea.value.trim() || fileInput.files.length > 0;
+    sendBtn.disabled = !hasContent;
+};
+
+textarea.addEventListener('input', updateInputState);
+
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+        fileNameSpan.textContent = fileInput.files[0].name;
+        fileDisplay.style.display = 'flex';
+    } else {
+        fileDisplay.style.display = 'none';
+        fileNameSpan.textContent = '';
+    }
+    updateInputState();
+});
+
+fileClearBtn.addEventListener('click', () => {
+    fileInput.value = ''; // 清除文件输入
+    fileDisplay.style.display = 'none';
+    fileNameSpan.textContent = '';
+    updateInputState();
+});
+
+// Allow Enter key to submit form
+textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (!sendBtn.disabled) {
+            sendMessage(new Event('submit'));
+        }
+    }
+});
+
+
+// === Chat Management ===
+
+// New Chat
+document.getElementById('new-chat-btn').addEventListener('click', createNewChat);
+function createNewChat() {
+  const id = Date.now();
+  const newChat = {id, title: '新对话', messages: []};
+  chats = [newChat]; // 仅保留当前对话
+  switchToChat(id);
+  renderChatList();
+}
+
+// Switch Chat (简化，因为只维护一个对话)
+function switchToChat(id) {
+  currentChatId = id;
+  const chat = chats.find(c => c.id === id);
+  renderMessages(chat ? chat.messages : []);
+  welcomeEl.style.display = chat && chat.messages.length === 0 ? 'flex' : 'none';
+  messagesEl.style.display = chat && chat.messages.length > 0 ? 'flex' : 'none';
+
+  updateInputState();
+}
+
+// Render Sidebar List (简化：仅显示当前对话)
+function renderChatList() {
+  chatListEl.innerHTML = '';
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (currentChat) {
+    const div = document.createElement('div');
+    div.className = 'chat-item active';
+    div.innerHTML = `
+      <span style="font-size:18px;">💬</span>
+      <div class="title">${escapeHtml(currentChat.title || '新对话')}</div>
+    `;
+    chatListEl.appendChild(div);
+  }
+}
+
+// Render Messages in Main Area
+function renderMessages(msgs) {
+  messagesEl.innerHTML = '';
+  msgs.forEach(msg => {
+    const div = document.createElement('div');
+    div.className = `message ${msg.role === 'user' ? 'user' : 'assistant'}`;
+
+    let bubbleContent = '';
+
+    // Process files
+    if (msg.files && msg.files.length > 0) {
+      msg.files.forEach(f => {
+        if (f.type.startsWith('image/')) {
+          // 在前端显示本地预览
+          bubbleContent += `<img src="${f.url}" alt="用户上传的图片">`;
+        } else {
+          bubbleContent += `<div class="file-preview"><span>📎</span>${escapeHtml(f.name)}</div>`;
+        }
+      });
+    }
+
+    // Process text
+    if (msg.text) {
+        // 如果是 loading 状态，不转义 HTML
+        if(msg.isPending) {
+            bubbleContent += msg.text;
+        } else {
+            bubbleContent += parseMarkdown(msg.text);
+        }
+    }
+
+    // Add bubble wrapper
+    div.innerHTML = `<div class="bubble">${bubbleContent}</div>`;
+
+    messagesEl.appendChild(div);
+  });
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  welcomeEl.style.display = msgs.length === 0 ? 'flex' : 'none';
+  messagesEl.style.display = msgs.length > 0 ? 'flex' : 'none';
+}
+
+
+// === Core Communication Logic: Using fetch with FormData ===
+
+form.addEventListener('submit', sendMessage);
+
+async function sendMessage(e) {
+  e.preventDefault();
+
+  const text = textarea.value.trim();
+  const files = Array.from(fileInput.files);
+  const currentChat = chats.find(c => c.id === currentChatId);
+
+  if (!text && files.length === 0) return;
+  if (!currentChat) return;
+
+  // --- 1. UI Update for User Message ---
+  const userFiles = files.map(file => ({
+    name: file.name,
+    type: file.type || 'application/octet-stream',
+    url: URL.createObjectURL(file) // For UI display
+  }));
+  currentChat.messages.push({role: 'user', text, files: userFiles});
+
+  // Update chat title
+  if (currentChat.title === '新对话') {
+      currentChat.title = text.substring(0, 30) || (files.length > 0 ? files[0].name.substring(0, 30) : '新对话');
+  }
+  renderMessages(currentChat.messages);
+  renderChatList();
+
+  // --- 2. UI Update for Assistant Loading Message ---
+  const loadingMessage = {
+      role: 'assistant',
+      text: '<div class="loading-dots"><span></span><span></span><span></span></div>',
+      isPending: true, // Custom flag
+      id: Date.now().toString()
+  };
+  currentChat.messages.push(loadingMessage);
+  renderMessages(currentChat.messages);
+
+  // Clear input area (must happen before async fetch)
+  textarea.value = '';
+  fileInput.value = '';
+  fileDisplay.style.display = 'none';
+  updateInputState(); // Disables send button
+
+  // --- 3. Prepare FormData for Flask Backend ---
+  const formData = new FormData();
+  formData.append('message', text); // 匹配 app.py 中的 request.form.get('message')
+
+  // 匹配 app.py 中的 request.files.get('image')
+  if (files.length > 0) {
+      formData.append('image', files[0], files[0].name);
+  }
+
+  // --- 4. Send Request to Flask Backend ---
+  let aiReplyText = "Agent 未能返回结果，请检查后端日志。";
+
+  try {
+      const response = await fetch('/chat', {
+          method: 'POST',
+          body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.status === "success") {
+          aiReplyText = result.reply;
+      } else {
+          // 处理后端返回的错误信息
+          aiReplyText = `[错误] ${result.reply}`;
+      }
+
+  } catch (error) {
+      console.error('Fetch Error:', error);
+      aiReplyText = `网络或服务器连接失败。错误信息: ${error.message}`;
+  } finally {
+      // --- 5. Final UI Update ---
+
+      // Find and remove the loading message
+      const loadingIndex = currentChat.messages.findIndex(msg => msg.id === loadingMessage.id);
+      if (loadingIndex !== -1) {
+          currentChat.messages.splice(loadingIndex, 1);
+      }
+
+      // Add the final reply
+      currentChat.messages.push({
+          role: 'assistant',
+          text: aiReplyText,
+          files: []
+      });
+
+      renderMessages(currentChat.messages);
+      updateInputState(); // Re-enable if needed
+  }
+}
+
+// 动画完全结束后移除 DOM 节点，避免占用内存
+document.getElementById('opening-animation')?.addEventListener('animationend', (e) => {
+  if (e.animationName === 'fadeOut') {
+    e.target.remove();
+  }
+});
+
+// Initial Setup
+window.addEventListener('load', () => {
+    if (chats.length === 0) {
+        createNewChat();
+    }
+});
+</script>
+</body>
+</html>

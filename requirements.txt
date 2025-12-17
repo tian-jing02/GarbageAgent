@@ -1,0 +1,22 @@
+Web 框架
+
+Flask>=3.0.0
+python-dotenv>=1.0.0
+
+LangChain 核心与社区库
+
+langchain==0.1.19
+langchain-core==0.1.52
+langchain-community==0.0.38
+
+工具类 (网络搜索)
+
+duckduckgo-search>=5.0.0
+
+图像处理 (如果 tools.py 中使用了相关库)
+
+pillow
+
+其他可能的依赖 (自动安装，但为了明确可以列出)
+
+requests
